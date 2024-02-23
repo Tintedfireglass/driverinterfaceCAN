@@ -59,21 +59,17 @@ static void MX_CAN_Init(void);
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 
-uint8_t TxData[8];
 uint8_t RxData[8];
 
-uint32_t TxMailbox;
 
-int datacheck = 0;
 
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_RxFIFO0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1,&RxHeader,RxData);
-	if (RxHeader.DLC ==2)
-	{
-		datacheck = 1;
+	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0,&RxHeader,RxData);
+  	HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
 
-	}
+
+
 }
 /* USER CODE END 0 */
 
@@ -108,36 +104,21 @@ int main(void)
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
 HAL_CAN_Start(&hcan);
-HAL_CAN_ActivateNotification(&hcan,CAN_IT_RX_FIFO1_MSG_PENDING);
+HAL_CAN_ActivateNotification(&hcan,CAN_IT_RX_FIFO0_MSG_PENDING);
 
-TxHeader.DLC =2;
-TxHeader.IDE = CAN_ID_EXT;
-TxHeader.RTR = CAN_RTR_DATA;
-TxHeader.StdId = 0x103;
 
-TxData[0] = 50;
-TxData[1] = 20;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  	HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
+	  	HAL_Delay(100);
     /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-	  if(datacheck)
-	  	  {
-	  		  for(int i=0;i<RxData[2];i++)
-	  		  {
-	  			  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
-	  			  HAL_Delay(RxData[0]);
-	  		  }
-	  		  datacheck = 0;
-
-	  	  }
-
   }
+    /* USER CODE BEGIN 3 */
+
   /* USER CODE END 3 */
 }
 
@@ -212,18 +193,7 @@ static void MX_CAN_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN_Init 2 */
-  CAN_FilterTypeDef canfilterconfig;
-  canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
-  canfilterconfig.FilterBank = 10;
-  canfilterconfig.FilterFIFOAssignment = CAN_FILTER_FIFO1;
-  canfilterconfig.FilterIdHigh = 0x6B1<<5;
-  canfilterconfig.FilterIdLow = 0;
-  canfilterconfig.FilterMaskIdHigh = 0x6B1<<5;
-  canfilterconfig.FilterMaskIdLow = 0;
-  canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  canfilterconfig.SlaveStartFilterBank = 0;
 
-  HAL_CAN_ConfigFilter(&hcan,&canfilterconfig);
 
   /* USER CODE END CAN_Init 2 */
 
