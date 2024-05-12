@@ -10,3 +10,4 @@ Debug/
 *Drivers/
 *.project
 *.cproject
+*.ld
